@@ -1,24 +1,47 @@
 # BOB
 
-A virtual pet game made in Godot 4.7. Your pet is Bob, a stick figure who walks
-around his room, talks to you and needs looking after.
+A virtual pet game made in Godot 4.7, built phone-first. Bob is a stick figure
+in an empty white room, drawn in a sketchy black-and-white style, and
+everything in the room is physics.
 
-- **Feed, Play, Shower, Sleep** keep his four needs (Food, Energy, Fun, Clean) up.
-- **Type in the chat box** to talk to him. He knows greetings, jokes and
-  compliments, and will "dance", "jump", "wave" or "come here" when asked.
-- **Click Bob** to poke him, **drag him** to pick him up and throw him.
+- **Drop toys**: drag one from the tray into the room, or tap it to drop it
+  from above. Ball, beach ball, crate, rubber duck, balloon (floats "up"),
+  anvil, and snacks, which Bob eats.
+- **Tilt your phone** and gravity follows it. Bob stands up against whichever
+  way is down, so he'll end up walking on the walls.
+- **Shake your phone** to throw everything around. Bob goes limp, flails,
+  and gets back up.
+- **Grab anything** with your finger, Bob included, and fling it.
+- **Talk** to him from the chat bar. He knows greetings and jokes, and will
+  "dance", "jump", "wave", "come here" or take a "nap" when asked.
 
-Bob is drawn entirely in code; there are no image assets. He saves every
-10 seconds, and his needs keep draining (slowly) while the game is closed.
+He has three needs: Food (drop snacks), Fun (toys, being flung around)
+and Energy (he naps on the floor when he runs out). He saves every 10
+seconds, and his needs drain slowly while the game is closed.
+
+On desktop: arrow keys tilt the room, Space shakes it.
 
 ## Files
 
-- `scripts/bob.gd`: drawing, animation, behaviour, speech bubble and voice
+- `scripts/bob.gd`: Bob's physics body, behaviour, pose, speech bubble and voice
 - `scripts/bob_talk.gd`: everything Bob says
-- `scripts/pet_state.gd`: needs, decay rates, saving
-- `scripts/room.gd`: the room
-- `scripts/hud.gd`: bars, buttons and chat box
+- `scripts/toy.gd`: the toys' physics
+- `scripts/sketch.gd`: the wobbly pencil lines and all toy drawings
+- `scripts/room.gd`: the walls, sized to the screen above the toy tray
+- `scripts/motion.gd`: phone tilt → gravity, phone shakes → impulses
+- `scripts/main.gd`: dropping toys, grabbing and flinging
+- `scripts/hud.gd`: needs meters, toy tray, chat bar
+- `scripts/pet_state.gd`: needs and saving
 - `tools/autopilot.gd`: scripted scene for recording the arcade attract video
+
+## Phone sensors on the web
+
+Browsers only give motion data to web pages, so the web export's
+`html/head_include` (in `export_presets.cfg`) adds a small script. It
+listens for `deviceorientation` / `devicemotion` into `window.bobMotion`,
+and on iOS asks for motion permission on the first tap. `motion.gd` reads
+that through `JavaScriptBridge`. When the game runs inside another page's
+iframe, the iframe needs `allow="accelerometer; gyroscope"`.
 
 ## Web build
 
@@ -27,6 +50,6 @@ https://sclondon.github.io/BOB/build/index.html. Re-export with:
 
     godot --headless --path . --export-release "Web" build/index.html
 
-Attract video:
+Attract video (16:9):
 
-    godot --path . --write-movie attract.avi --fixed-fps 30 --quit-after 555 -- --autopilot
+    godot --path . --resolution 1280x720 --write-movie attract.avi --fixed-fps 30 --quit-after 540 -- --autopilot

@@ -92,7 +92,7 @@ body {
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
-
+<script>window.bobMotion={has:false,beta:0,gamma:0,angle:0,ax:0,ay:0,az:0};(function(){var m=window.bobMotion;function angle(){return (screen.orientation&&screen.orientation.angle)||window.orientation||0;}window.addEventListener('deviceorientation',function(e){if(e.beta===null||e.gamma===null)return;m.beta=e.beta;m.gamma=e.gamma;m.angle=angle();m.has=true;});window.addEventListener('devicemotion',function(e){var a=e.acceleration;if(a&&a.x!==null){m.ax=a.x;m.ay=a.y;m.az=a.z;}});var asked=false;function ask(){if(asked)return;asked=true;[window.DeviceOrientationEvent,window.DeviceMotionEvent].forEach(function(E){if(E&&typeof E.requestPermission==='function'){E.requestPermission().catch(function(){});}});}document.addEventListener('touchend',ask,true);document.addEventListener('click',ask,true);})();</script>
 	</head>
 	<body>
 		<canvas id="canvas">
@@ -111,7 +111,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":56768,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":70620,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 

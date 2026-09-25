@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="BOB"
-config/description="A virtual pet game about taking care of a stick figure named Bob."
+config/description="A virtual pet game about a stick figure named Bob in an empty white room."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
@@ -19,14 +19,22 @@ config/icon="res://icon.svg"
 [autoload]
 
 PetState="*res://scripts/pet_state.gd"
+Motion="*res://scripts/motion.gd"
 
 [display]
 
-window/size/viewport_width=1280
+window/size/viewport_width=720
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[physics]
+
+common/physics_ticks_per_second=120
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.984, 0.984, 0.973, 1)

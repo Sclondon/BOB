@@ -1,44 +1,37 @@
 extends Node
 ## Plays a short scripted scene so the arcade attract video can be recorded:
 ##
-##   godot --path . --write-movie attract.avi --fixed-fps 30 --quit-after 540 -- --autopilot
+##   godot --path . --write-movie attract.avi --fixed-fps 30 --quit-after 600 -- --autopilot
 ##
-## main.gd adds this node when it sees --autopilot. The movie maker has no real
-## mouse or keyboard, so this types into the chat box and presses the HUD
-## actions by calling the same functions the buttons do.
-
-const CHAT := "hi bob! can you dance?"
-const TYPE_START := 2.6
-const TYPE_SPEED := 14.0  # characters per second
+## main.gd adds this node when it sees --autopilot. The movie maker has no
+## real phone, so this drops toys and tilts and shakes the room directly.
 
 var main: Node
-var bob: Node2D
-var hud: CanvasLayer
 var time := 0.0
-var _step := 0
+var _beats := [
+	[1.2, "drop", "ball"],
+	[3.4, "drop", "duck"],
+	[5.0, "drop", "crate"],
+	[7.2, "tilt", -0.8],
+	[9.4, "tilt", 0.0],
+	[11.0, "shake", Vector2(-24, -14)],
+	[13.6, "drop", "snack"],
+	[14.2, "drop", "balloon"],
+]
 
 
 func _ready() -> void:
 	main = get_parent()
-	bob = main.get_node("Bob")
-	hud = main.get_node("HUD")
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	time += delta
-	# Keep Bob standing still between beats instead of wandering off.
-	if bob.state == 0:
-		bob.state_duration = 999.0
-
-	var typed := clampi(int((time - TYPE_START) * TYPE_SPEED), 0, CHAT.length())
-	if _step == 0 and time >= TYPE_START:
-		hud._chat_input.text = CHAT.left(typed)
-		if typed == CHAT.length() and time >= TYPE_START + CHAT.length() / TYPE_SPEED + 0.3:
-			hud._send(CHAT)
-			_step = 1
-	elif _step == 1 and time >= 8.8:
-		bob.feed()
-		_step = 2
-	elif _step == 2 and time >= 12.2:
-		bob.play()
-		_step = 3
+	while not _beats.is_empty() and time >= _beats[0][0]:
+		var beat: Array = _beats.pop_front()
+		match beat[1]:
+			"drop":
+				main.spawn_toy(beat[2], main._drop_point(), Vector2.ZERO)
+			"tilt":
+				Motion._key_angle = beat[2]
+			"shake":
+				Motion.shake(beat[2])

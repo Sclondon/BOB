@@ -4,14 +4,13 @@ extends Node
 signal stats_changed
 
 const SAVE_PATH := "user://bob_save.json"
-const STATS := ["hunger", "energy", "fun", "hygiene"]
+const STATS := ["hunger", "energy", "fun"]
 
 # How fast each need drains, in points per minute (stats run 0-100).
 const HUNGER_DECAY := 4.0
 const FUN_DECAY := 5.0
-const HYGIENE_DECAY := 2.5
 const ENERGY_DECAY := 3.0
-const ENERGY_SLEEP_GAIN := 15.0
+const ENERGY_NAP_GAIN := 20.0
 
 # While the game is closed, needs drain slower and never bottom out completely.
 const OFFLINE_RATE := 0.25
@@ -21,18 +20,16 @@ const OFFLINE_FLOOR := 10.0
 var hunger := 80.0  # 100 = full, 0 = starving
 var energy := 80.0
 var fun := 80.0
-var hygiene := 80.0
 var asleep := false
 var age_seconds := 0.0
 
 var is_new_game := true
 var seconds_away := 0.0
 
-var _save_timer := 0.0
-
-
 ## Attract-video mode (see tools/autopilot.gd) plays a fresh Bob and never saves.
 var autopilot := "--autopilot" in OS.get_cmdline_user_args()
+
+var _save_timer := 0.0
 
 
 func _ready() -> void:
@@ -57,9 +54,8 @@ func _notification(what: int) -> void:
 func tick(seconds: float, rate := 1.0) -> void:
 	var minutes := seconds / 60.0 * rate
 	hunger = clampf(hunger - HUNGER_DECAY * minutes, 0.0, 100.0)
-	hygiene = clampf(hygiene - HYGIENE_DECAY * minutes, 0.0, 100.0)
 	if asleep:
-		energy = clampf(energy + ENERGY_SLEEP_GAIN * minutes, 0.0, 100.0)
+		energy = clampf(energy + ENERGY_NAP_GAIN * minutes, 0.0, 100.0)
 	else:
 		energy = clampf(energy - ENERGY_DECAY * minutes, 0.0, 100.0)
 		fun = clampf(fun - FUN_DECAY * minutes, 0.0, 100.0)
@@ -74,14 +70,14 @@ func change(stat: String, amount: float) -> void:
 
 ## Overall mood. A single terrible need drags everything down.
 func happiness() -> float:
-	var lowest := minf(minf(hunger, energy), minf(fun, hygiene))
-	var average := (hunger + energy + fun + hygiene) / 4.0
+	var lowest := minf(hunger, minf(energy, fun))
+	var average := (hunger + energy + fun) / 3.0
 	return minf(average, lowest + 35.0)
 
 
 func mood_name() -> String:
 	if asleep:
-		return "Sleeping"
+		return "Napping"
 	var h := happiness()
 	if h > 85.0:
 		return "Ecstatic"
@@ -122,8 +118,6 @@ func save_game() -> void:
 		"hunger": hunger,
 		"energy": energy,
 		"fun": fun,
-		"hygiene": hygiene,
-		"asleep": asleep,
 		"age_seconds": age_seconds,
 		"saved_at": Time.get_unix_time_from_system(),
 	}
@@ -145,8 +139,6 @@ func load_game() -> void:
 	hunger = float(data.get("hunger", hunger))
 	energy = float(data.get("energy", energy))
 	fun = float(data.get("fun", fun))
-	hygiene = float(data.get("hygiene", hygiene))
-	asleep = bool(data.get("asleep", false))
 	age_seconds = float(data.get("age_seconds", 0.0))
 
 	var now := Time.get_unix_time_from_system()

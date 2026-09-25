@@ -8,14 +8,18 @@
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
 
-[node name="Lights" type="CanvasModulate" parent="."]
-
-[node name="Room" type="Node2D" parent="."]
+[node name="Room" type="StaticBody2D" parent="."]
 script = ExtResource("2_room")
 
-[node name="Bob" type="Node2D" parent="."]
-position = Vector2(640, 600)
+[node name="Toys" type="Node2D" parent="."]
+
+[node name="Bob" type="RigidBody2D" parent="."]
+position = Vector2(360, 400)
 script = ExtResource("3_bob")
+
+[node name="Ghost" type="Node2D" parent="."]
+visible = false
+z_index = 40
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("4_hud")

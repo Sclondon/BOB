@@ -5,7 +5,7 @@ extends RefCounted
 const GREETINGS := [
 	"Hi!! Hi hi hi.",
 	"Hey, it's you! My favorite person.",
-	"Hello! Welcome to my room.",
+	"Hello! Welcome to my extremely white room.",
 	"Oh hey! I was just standing here. Like I do.",
 ]
 const FAREWELLS := [
@@ -50,10 +50,12 @@ const FALLBACKS := [
 ]
 const RANDOM_THOUGHTS := [
 	"Being a stick figure is pretty great, honestly.",
-	"I wonder what's outside that window.",
+	"I wonder what's outside this room. More white, probably.",
 	"Do you ever think about lines? I'm made of them.",
 	"La la la~",
-	"I like this room.",
+	"It's very white in here.",
+	"Got any toys? This room is kind of empty.",
+	"Tilt the room. I dare you.",
 	"I tried to draw myself once. It was just lines.",
 	"What's your favorite food? Mine's pizza.",
 	"I'm glad you're here.",
@@ -61,9 +63,23 @@ const RANDOM_THOUGHTS := [
 	"If I turn sideways, do I disappear?",
 	"Hmm hmm hmm...",
 	"I had a dream I was a circle.",
-	"Is it just me, or is that clock judging me?",
 	"You can pick me up, you know. Just saying.",
+	"Please don't drop an anvil on me. Please.",
 ]
+
+# What Bob says when a toy lands ("drop") and when he plays with it ("play").
+const TOY_LINES := {
+	"ball": {"drop": ["A ball!", "Ooh, ball!"], "play": ["Kick!", "GOOOAL!", "Hup!"]},
+	"beachball": {"drop": ["Beach ball! Where's the beach?"], "play": ["Boing!", "Header!"]},
+	"crate": {"drop": ["A box! What's in it?", "Crate. Nice."], "play": ["Hnnng! Heavy!", "Push!"]},
+	"duck": {"drop": ["DUCK!", "A friend!"], "play": ["*squeak*", "Quack quack!"]},
+	"balloon": {"drop": ["Balloon! It's going up!", "Ooh, floaty."], "play": ["Boop!", "Up you go!"]},
+	"anvil": {"drop": ["Is that an ANVIL?!", "Why do you have an anvil?"], "play": ["Nope."]},
+	"snack": {"drop": ["Snack!!", "Is that for me?"], "play": ["Mmm!"]},
+}
+const OUCH_LINES := ["OW!", "Oof!", "Ouch!", "Hey!", "My circle!"]
+const TUMBLE_LINES := ["WHOAAA!", "AAAH!", "Wheee!", "Not again!", "Earthquake!"]
+const GETUP_LINES := ["I'm okay!", "Hup!", "Nailed it.", "Everything's spinning...", "I meant to do that."]
 
 
 static func reply(message: String) -> Dictionary:
@@ -80,6 +96,8 @@ static func reply(message: String) -> Dictionary:
 		return _r("Hiiii! *waves*", "wave")
 	if _has(m, ["come here", "come", "over here"]):
 		return _r("Coming!", "come")
+	if _has(m, ["nap", "sleep", "go to sleep", "bedtime"]) and PetState.energy < 90.0:
+		return _r("A nap? Don't mind if I do...", "nap")
 
 	# Conversation
 	if _has(m, ["how are you", "how r u", "how do you feel", "are you ok", "you ok", "hows it going", "how is it going", "whats up", "sup"]):
@@ -103,7 +121,11 @@ static func reply(message: String) -> Dictionary:
 	if _has(m, ["sleep", "sleepy", "tired", "nap", "bed"]):
 		return _r(_energy_status())
 	if _has(m, ["smell", "stink", "stinky", "shower", "bath", "clean", "dirty"]):
-		return _r(_hygiene_status())
+		return _r("No shower in here. It's just me, this white room, and whatever you drop in it.")
+	if _has(m, ["toy", "toys", "ball", "duck"]):
+		return _r(["Drop something in! I'll play with it.", "Ball, please. I have a great kick."].pick_random())
+	if _has(m, ["anvil"]):
+		return _r("Don't you dare.")
 	if _has(m, ["play", "bored", "game", "fun"]):
 		return _r(_fun_status())
 	if _has(m, ["thank", "thanks", "thx", "ty"]):
@@ -134,8 +156,6 @@ static func ambient() -> String:
 			return ["*yawn*", "I could really use a nap.", "My stick legs are so tired..."].pick_random()
 		"fun":
 			return ["I'm sooo bored.", "Wanna play something?", "Hello? Anybody want to play?"].pick_random()
-		"hygiene":
-			return ["Is that smell... me?", "I think I need a shower.", "Even the flies are leaving."].pick_random()
 	var hour: int = Time.get_time_dict_from_system()["hour"]
 	if (hour >= 23 or hour < 5) and randf() < 0.3:
 		return "It's really late... shouldn't you be asleep too?"
@@ -150,8 +170,6 @@ static func how_am_i() -> String:
 			return "So... sleepy... *yawn*"
 		"fun":
 			return "Kinda bored, to be honest."
-		"hygiene":
-			return "I feel a bit... crusty. Shower time?"
 	var h := PetState.happiness()
 	if h > 80.0:
 		return "I'm doing GREAT! Best day ever!"
@@ -162,7 +180,7 @@ static func how_am_i() -> String:
 
 static func _hunger_status() -> String:
 	if PetState.hunger < 30.0:
-		return "YES. So hungry. Please feed me!"
+		return "YES. So hungry. Drop me a snack!"
 	if PetState.hunger < 70.0:
 		return "I could eat. I could always eat."
 	return "I'm full, thanks! Pizza is still my favorite though."
@@ -170,16 +188,14 @@ static func _hunger_status() -> String:
 
 static func _energy_status() -> String:
 	if PetState.energy < 30.0:
-		return "I'm exhausted. Put me to bed?"
+		return "I'm exhausted. Tell me to take a nap?"
 	if PetState.energy < 70.0:
 		return "A little tired, but I'm okay."
 	return "Sleep? I'm wide awake!"
 
 
-static func _hygiene_status() -> String:
-	if PetState.hygiene < 35.0:
-		return "Okay... I might smell a little. Shower please?"
-	return "I'm clean! Smell me. Actually, don't."
+static func toy_line(kind: String, event: String) -> String:
+	return TOY_LINES.get(kind, TOY_LINES.ball)[event].pick_random()
 
 
 static func _fun_status() -> String:
